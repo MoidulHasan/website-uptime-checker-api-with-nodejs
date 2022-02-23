@@ -9,15 +9,34 @@
 const http = require("http");
 const { handleReqRes } = require("./helpers/handlereqres");
 const environment = require("./helpers/environment");
-const data = require("./lib/data")
-    // App object - module scafolding
+const data = require("./lib/data");
+// App object - module scafolding
 const app = {};
 
-// write test data
-data.create('test', 'newFile', { "Name": "Moidul Hasan Khan" }, (errMessage, err) => {
-    console.log(errMessage, err);
-})
+// write data in file
+// data.create('test', 'newFile', { "Name": "Moidul Hasan Khan" }, (errMessage, err) => {
+//     console.log(errMessage, err);
+// })
 
+// read data from file
+// data.read('test', 'newFile', (err, data) => {
+//     console.log(err, data);
+// })
+
+// update data
+// data.update('test', 'newFile', { "Name": "Antu" }, (errMessage, err) => {
+//     console.log(errMessage, err);
+// })
+
+// read data from file
+// data.read('test', 'newFile', (err, data) => {
+//     console.log(err, data);
+// })
+
+// delete file
+// data.delete('test', 'newFile', (message, err) => {
+//     console.log(message, err);
+// })
 
 // Create Server
 app.createServer = () => {
