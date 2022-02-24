@@ -11,6 +11,7 @@ const { StringDecoder } = require("string_decoder");
 const url = require("url");
 const { notFoundHandler } = require("../handlers/routeHandlers/notFoundHandler");
 const routes = require("../routes");
+const { parseJSON } = require("../helpers/utilities")
 
 // Object Scafolding
 handeler = {};
@@ -19,13 +20,13 @@ handeler.handleReqRes = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const path = parsedUrl.pathname;
     const trimedPath = path.replace(/^\/+|\/+$/g, "");
-    // console.log(trimedPath);
-    // res.end("Hello World");
+    const method = req.method.toLowerCase();
 
     const requestProperty = {
         parsedUrl,
         path,
         trimedPath,
+        method,
     }
 
     const chosenHandler = routes[trimedPath] ? routes[trimedPath] : notFoundHandler;
@@ -35,6 +36,8 @@ handeler.handleReqRes = (req, res) => {
         payload = typeof(payload) === "object" ? payload : {};
         const payloadString = JSON.stringify(payload);
 
+        // return the final response 
+        res.setHeader('Content-Type', 'application/json')
         res.writeHead(statusCode);
         res.end(payloadString);
     });
@@ -47,6 +50,8 @@ handeler.handleReqRes = (req, res) => {
 
     req.on("end", () => {
         realData += decoder.end();
+
+        requestProperty.body = parseJSON(realData);
         res.end(realData);
         console.log(realData);
     });
