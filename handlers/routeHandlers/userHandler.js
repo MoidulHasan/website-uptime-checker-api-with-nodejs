@@ -6,7 +6,7 @@
  */
 
 // Dependencies
-const { hash } = require("../../helpers/utilities");
+const { hash, parseJSON } = require("../../helpers/utilities");
 const data = require("../../lib/data")
 
 // Module Scafolding
@@ -31,10 +31,10 @@ handler._users.post = (requestProperty, callback) => {
     // validete first name
     const firstName = typeof(requestProperty.body.firstName) === "string" && requestProperty.body.firstName.trim().length > 0 ? requestProperty.body.firstName : false;
 
-    // validete second name
+    // validete lastName name
     const lastName = typeof(requestProperty.body.lastName) === "string" && requestProperty.body.lastName.trim().length > 0 ? requestProperty.body.lastName : false;
 
-    // validete second name
+    // validete phone name
     const phone = typeof(requestProperty.body.phone) === "string" && requestProperty.body.phone.trim().length === 11 ? requestProperty.body.phone : false;
 
     // validete password
@@ -74,7 +74,6 @@ handler._users.post = (requestProperty, callback) => {
             }
         })
     } else {
-        // console.log(requestProperty.body);
         callback(400, {
             message: "You have problem with your input.",
         })
@@ -82,7 +81,27 @@ handler._users.post = (requestProperty, callback) => {
 }
 
 handler._users.get = (requestProperty, callback) => {
-    callback(200, { message: requestProperty });
+    // validete second name
+    const phone = typeof(requestProperty.queryObject.phone) === "string" && requestProperty.queryObject.phone.trim().length === 11 ? requestProperty.queryObject.phone : false;
+
+    if (phone) {
+        data.read("users", phone, (err, data) => {
+            const user = parseJSON(data);
+            delete user.password;
+            console.log(data)
+            if (!err && user) {
+                callback(200, user);
+            } else {
+                callback(404, {
+                    error: "User not found."
+                })
+            }
+        })
+    } else {
+        callback(404, {
+            error: "Request user not found."
+        })
+    }
 };
 
 handler._users.put = (requestProperty, callback) => {

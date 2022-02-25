@@ -21,6 +21,7 @@ handeler.handleReqRes = (req, res) => {
     // get the url and parse it
     const parsedUrl = url.parse(req.url, true);
     const path = parsedUrl.pathname;
+    const queryObject = parsedUrl.query;
     const trimedPath = path.replace(/^\/+|\/+$/g, "");
     const method = req.method.toLowerCase();
 
@@ -29,6 +30,7 @@ handeler.handleReqRes = (req, res) => {
         path,
         trimedPath,
         method,
+        queryObject,
     }
 
     const chosenHandler = routes[trimedPath] ? routes[trimedPath] : notFoundHandler;
