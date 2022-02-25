@@ -6,6 +6,8 @@
  */
 
 // Dependencies 
+const cripto = require("crypto");
+const envireonemets = require("./environment");
 
 // Module scafolding
 const Utilities = {};
@@ -23,6 +25,15 @@ Utilities.parseJSON = (jsonString) => {
     return output;
 };
 
+
+// Hassh string 
+Utilities.hash = (string) => {
+    if (typeof(string) === "string" && string.length > 0) {
+        const hash = cripto.createHmac('sha256', envireonemets.secrateKey).update(string).digest("hex");
+        return hash;
+    }
+    return false;
+}
 
 // Export module
 module.exports = Utilities;

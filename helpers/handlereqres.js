@@ -17,6 +17,8 @@ const { parseJSON } = require("../helpers/utilities")
 handeler = {};
 
 handeler.handleReqRes = (req, res) => {
+    // request handling
+    // get the url and parse it
     const parsedUrl = url.parse(req.url, true);
     const path = parsedUrl.pathname;
     const trimedPath = path.replace(/^\/+|\/+$/g, "");
@@ -31,29 +33,28 @@ handeler.handleReqRes = (req, res) => {
 
     const chosenHandler = routes[trimedPath] ? routes[trimedPath] : notFoundHandler;
 
-    chosenHandler(requestProperty, (statusCode, payload) => {
-        statusCode = typeof(statusCode) === "number" ? statusCode : 500;
-        payload = typeof(payload) === "object" ? payload : {};
-        const payloadString = JSON.stringify(payload);
-
-        // return the final response 
-        res.setHeader('Content-Type', 'application/json')
-        res.writeHead(statusCode);
-        res.end(payloadString);
-    });
-
     const decoder = new StringDecoder("utf-8");
     let realData = "";
+
     req.on("data", (buffer) => {
         realData += decoder.write(buffer);
     });
 
     req.on("end", () => {
         realData += decoder.end();
-
         requestProperty.body = parseJSON(realData);
-        res.end(realData);
-        console.log(realData);
+
+
+        chosenHandler(requestProperty, (statusCode, payload) => {
+            statusCode = typeof(statusCode) === "number" ? statusCode : 500;
+            payload = typeof(payload) === "object" ? payload : {};
+            const payloadString = JSON.stringify(payload);
+
+            // return the final response 
+            res.setHeader('Content-Type', 'application/json')
+            res.writeHead(statusCode);
+            res.end(payloadString);
+        });
     });
 };
 
