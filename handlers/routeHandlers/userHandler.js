@@ -172,20 +172,31 @@ handler._users.delete = (requestProperty, callback) => {
     // validete phone
     const phone = typeof(requestProperty.body.phone) === "string" && requestProperty.body.phone.trim().length === 11 ? requestProperty.body.phone : false;
 
+    // validete password
+    const password = typeof(requestProperty.body.password) === "string" && requestProperty.body.password.trim().length > 0 ? requestProperty.body.password : false;
+
     if (phone) {
         data.read("users", phone, (err, userData) => {
             if (!err) {
-                data.delete("users", phone, (err) => {
-                    if (!err) {
-                        callback(200, {
-                            message: "User Deleted Successfully"
-                        });
-                    } else {
-                        callback(400, {
-                            message: "User could not deleted."
-                        });
-                    }
-                });
+                const user = parseJSON(userData);
+
+                if (hash(password) === user.password) {
+                    data.delete("users", phone, (err) => {
+                        if (!err) {
+                            callback(200, {
+                                message: "User Deleted Successfully"
+                            });
+                        } else {
+                            callback(400, {
+                                message: "User could not deleted."
+                            });
+                        }
+                    });
+                } else {
+                    callback(404, {
+                        error: "Could not delete user data, Password dosen't match."
+                    })
+                }
             } else {
                 callback(404, {
                     error: "User dosen't exist."
