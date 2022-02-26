@@ -35,5 +35,20 @@ Utilities.hash = (string) => {
     return false;
 }
 
+// Create random string by length 
+Utilities.createRandomString = (stringLength) => {
+    // validate string length
+    const length = typeof(stringLength) === "number" && stringLength > 0 ? stringLength : false;
+    const string = "abcdefghijklmnopqrstuvxyz1234456789";
+    let randomString = "";
+
+    for (let i = 1; i <= length; i++) {
+        const randomIndex = Math.floor(Math.random() * string.length);
+        randomString += string.charAt(randomIndex);
+    }
+
+    return randomString;
+};
+
 // Export module
 module.exports = Utilities;
