@@ -147,7 +147,30 @@ handler._token.put = (requestProperty, callback) => {
 };
 
 // delete token handler
-handler._token.delete = () => {
+handler._token.delete = (requestProperty, callback) => {
+    // validate token id
+    const id = typeof(requestProperty.queryObject.id) === "string" && requestProperty.queryObject.id.trim().length === 20 ? requestProperty.queryObject.id : false;
+
+    // lookup token data
+    data.read("tokens", id, (err) => {
+        if (!err) {
+            data.delete("tokens", id, (err) => {
+                if (!err) {
+                    callback(200, {
+                        message: "Token deleted succesfully."
+                    });
+                } else {
+                    callback(500, {
+                        error: "There was a server site error."
+                    });
+                }
+            })
+        } else {
+            callback(400, {
+                error: "You have problem with your request."
+            });
+        }
+    });
 
 };
 
