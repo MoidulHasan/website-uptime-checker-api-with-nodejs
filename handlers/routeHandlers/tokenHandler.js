@@ -78,16 +78,75 @@ handler._token.post = (requestProperty, callback) => {
 
 };
 
-handler._token.get = () => {
+// read token data by get request
+handler._token.get = (requestProperty, callback) => {
+    // validate token id
+    const tokenId = typeof(requestProperty.queryObject.id) === "string" && requestProperty.queryObject.id.trim().length === 20 ? requestProperty.queryObject.id : false;
 
+    if (tokenId) {
+        // lookup the token
+        data.read("tokens", tokenId, (err, tokenData) => {
+            const token = parseJSON(tokenData);
+            if (!err && token) {
+                callback(200, token);
+            } else {
+                callback(404, {
+                    error: "Requested user not found.",
+                });
+            }
+        });
+    } else {
+        callback(404, {
+            error: "Requested user not found."
+        });
+    }
 };
 
+// update token data by put request
+handler._token.put = (requestProperty, callback) => {
+    // validate token id
+    const tokenId = typeof(requestProperty.body.id) === "string" && requestProperty.body.id.trim().length === 20 ? requestProperty.body.id : false;
 
-handler._token.put = () => {
+    // validate extand request
+    const extand = typeof(requestProperty.body.extand) === "boolean" && requestProperty.body.extand == true ? true : false;
 
+    if (tokenId && extand) {
+        // lookup token data
+        data.read("tokens", tokenId, (err, tokenData) => {
+            if (!err) {
+                const tokenObject = parseJSON(tokenData);
+                if (tokenObject.expires > Date.now()) {
+                    tokenObject.expires = Date.now() + 60 * 60 * 1000;
+                    data.update("tokens", tokenId, tokenObject, (errMessage, err) => {
+                        if (!err) {
+                            callback(200, {
+                                message: "Token extandate successfully."
+                            })
+                        } else {
+                            callback(500, {
+                                error: "Could not update token, there is a problem in server side.",
+                            })
+                        }
+                    });
+                } else {
+                    callback(400, {
+                        error: "Token already expires.",
+                    });
+                }
+            } else {
+                callback(400, {
+                    error: "There was a problem with your request."
+                });
+            }
+        });
+    } else {
+        callback(400, {
+            error: "There was a problem with your request."
+        });
+    }
 };
 
-
+// delete token handler
 handler._token.delete = () => {
 
 };
