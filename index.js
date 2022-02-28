@@ -13,31 +13,6 @@ const data = require("./lib/data");
 // App object - module scafolding
 const app = {};
 
-// write data in file
-// data.create('test', 'newFile', { "Name": "Moidul Hasan Khan" }, (errMessage, err) => {
-//     console.log(errMessage, err);
-// })
-
-// read data from file
-// data.read('test', 'newFile', (err, data) => {
-//     console.log(err, data);
-// })
-
-// update data
-// data.update('test', 'newFile', { "Name": "Antu" }, (errMessage, err) => {
-//     console.log(errMessage, err);
-// })
-
-// read data from file
-// data.read('test', 'newFile', (err, data) => {
-//     console.log(err, data);
-// })
-
-// delete file
-// data.delete('test', 'newFile', (message, err) => {
-//     console.log(message, err);
-// })
-
 // Create Server
 app.createServer = () => {
     const server = http.createServer(app.handleReqRes);
@@ -48,5 +23,6 @@ app.createServer = () => {
 
 // Handle request response
 app.handleReqRes = handleReqRes;
+
 // Start the server
 app.createServer();

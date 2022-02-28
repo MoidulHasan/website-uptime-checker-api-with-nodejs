@@ -8,7 +8,7 @@
 // Dependencies
 const { hash, parseJSON, createRandomString } = require("../../helpers/utilities");
 const data = require("../../lib/data")
-
+const tokenHandler = require('./tokenHandler');
 // Module Scafolding
 const handler = {};
 
@@ -84,29 +84,29 @@ handler._users.get = (requestProperty, callback) => {
     // validete phone
     const phone = typeof(requestProperty.queryObject.phone) === "string" && requestProperty.queryObject.phone.trim().length === 11 ? requestProperty.queryObject.phone : false;
 
-    // validete password
-    const password = typeof(requestProperty.queryObject.password) === "string" && requestProperty.queryObject.password.trim().length > 0 ? requestProperty.queryObject.password : false;
-
     if (phone) {
-        data.read("users", phone, (err, data) => {
-            if (!err && data) {
-                const user = parseJSON(data);
-                if (password && hash(password) === user.password) {
-                    delete user.password;
+        // verify token
+        const token = typeof(requestProperty.headerObj.token) === 'string' ? requestProperty.headerObj.token : false;
 
-                    callback(200, user);
-                } else {
-                    callback(404, {
-                        error: "Invalid password"
-                    })
-                }
-
+        tokenHandler._token.verify(token, phone, (tokenErr) => {
+            if (tokenErr) {
+                data.read("users", phone, (err, data) => {
+                    if (!err && data) {
+                        const user = parseJSON(data);
+                        delete user.password;
+                        callback(200, user);
+                    } else {
+                        callback(404, {
+                            error: "User not found."
+                        })
+                    }
+                });
             } else {
-                callback(404, {
-                    error: "User not found."
-                })
+                callback(403, {
+                    error: "Authentication Failure!"
+                });
             }
-        })
+        });
     } else {
         callback(404, {
             error: "Request user not found."
@@ -131,46 +131,52 @@ handler._users.put = (requestProperty, callback) => {
     // validete password
     const newPassword = typeof(requestProperty.body.newPassword) === "string" && requestProperty.body.newPassword.trim().length > 0 ? requestProperty.body.newPassword : false;
 
-    if (phone && currentPassword && (firstName || lastName || newPassword)) {
-        data.read("users", phone, (err, userData) => {
-            if (!err) {
-                const user = parseJSON(userData);
-                if (hash(currentPassword) === user.password) {
-                    // update data to user object if requested to update
-                    if (firstName) {
-                        user.firstName = firstName;
-                    }
+    if (phone && (firstName || lastName || (newPassword && currentPassword))) {
 
-                    if (lastName) {
-                        user.lastName = lastName;
-                    }
+        // verify token
+        const token = typeof(requestProperty.headerObj.token) === 'string' ? requestProperty.headerObj.token : false;
 
-                    if (newPassword) {
-                        user.password = hash(newPassword);
-                    }
-
-                    data.update("users", phone, user, (Message, err) => {
-                        if (!err) {
-                            callback(200, {
-                                message: Message
-                            })
-                        } else {
-                            callback(400, {
-                                error: Message
-                            });
+        tokenHandler._token.verify(token, phone, (tokenErr) => {
+            if (tokenErr) {
+                data.read("users", phone, (err, userData) => {
+                    if (!err) {
+                        const user = parseJSON(userData);
+                        // update data to user object if requested to update
+                        if (firstName) {
+                            user.firstName = firstName;
                         }
-                    })
-                } else {
-                    callback(404, {
-                        error: "Could not update user data, Current password dosen't match."
-                    })
-                }
+
+                        if (lastName) {
+                            user.lastName = lastName;
+                        }
+
+                        if (newPassword) {
+                            user.password = hash(newPassword);
+                        }
+
+                        data.update("users", phone, user, (Message, err) => {
+                            if (!err) {
+                                callback(200, {
+                                    message: Message
+                                })
+                            } else {
+                                callback(400, {
+                                    error: Message
+                                });
+                            }
+                        })
+                    } else {
+                        callback(404, {
+                            error: "User not found."
+                        })
+                    }
+                });
             } else {
-                callback(404, {
-                    error: "User not found."
-                })
+                callback(403, {
+                    error: "Authentication Failure!"
+                });
             }
-        })
+        });
     } else {
         callback(404, {
             error: "Could not update data, please provide valid data."
@@ -182,34 +188,36 @@ handler._users.delete = (requestProperty, callback) => {
     // validete phone
     const phone = typeof(requestProperty.body.phone) === "string" && requestProperty.body.phone.trim().length === 11 ? requestProperty.body.phone : false;
 
-    // validete password
-    const password = typeof(requestProperty.body.password) === "string" && requestProperty.body.password.trim().length > 0 ? requestProperty.body.password : false;
-
     if (phone) {
-        data.read("users", phone, (err, userData) => {
-            if (!err) {
-                const user = parseJSON(userData);
+        // verify token
+        const token = typeof(requestProperty.headerObj.token) === 'string' ? requestProperty.headerObj.token : false;
 
-                if (hash(password) === user.password) {
-                    data.delete("users", phone, (err) => {
-                        if (!err) {
-                            callback(200, {
-                                message: "User Deleted Successfully"
-                            });
-                        } else {
-                            callback(400, {
-                                message: "User could not deleted."
-                            });
-                        }
-                    });
-                } else {
-                    callback(404, {
-                        error: "Could not delete user data, Password dosen't match."
-                    });
-                }
+        tokenHandler._token.verify(token, phone, (tokenErr) => {
+            if (tokenErr) {
+                data.read("users", phone, (err, userData) => {
+                    if (!err) {
+                        const user = parseJSON(userData);
+
+                        data.delete("users", phone, (err) => {
+                            if (!err) {
+                                callback(200, {
+                                    message: "User Deleted Successfully"
+                                });
+                            } else {
+                                callback(400, {
+                                    message: "User could not deleted."
+                                });
+                            }
+                        });
+                    } else {
+                        callback(404, {
+                            error: "User dosen't exist."
+                        });
+                    }
+                });
             } else {
-                callback(404, {
-                    error: "User dosen't exist."
+                callback(403, {
+                    error: "Authentication Failure!"
                 });
             }
         });
