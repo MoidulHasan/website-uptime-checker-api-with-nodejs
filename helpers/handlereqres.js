@@ -26,6 +26,8 @@ handeler.handleReqRes = (req, res) => {
     const method = req.method.toLowerCase();
     const headerObj = req.headers;
 
+    console.log(headerObj);
+
     const requestProperty = {
         parsedUrl,
         path,

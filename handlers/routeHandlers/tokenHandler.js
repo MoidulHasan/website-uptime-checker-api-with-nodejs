@@ -15,7 +15,7 @@ const handler = {};
 handler.tokenHandler = (requestProperty, callback) => {
     const acceptedMethods = ['get', 'post', 'put', 'delete'];
     if (acceptedMethods.indexOf(requestProperty.method) > -1) {
-        handler._token[requestProperty.method](requestProperty, callback);
+        handler.tokenHandler._token[requestProperty.method](requestProperty, callback);
     } else {
         callback(405, {
             message: `Bad Request type, Request denied.`
@@ -24,10 +24,10 @@ handler.tokenHandler = (requestProperty, callback) => {
 };
 
 
-handler._token = {};
+handler.tokenHandler._token = {};
 
 // create token on post request
-handler._token.post = (requestProperty, callback) => {
+handler.tokenHandler._token.post = (requestProperty, callback) => {
     // validete phone name
     const phone = typeof(requestProperty.body.phone) === "string" && requestProperty.body.phone.trim().length === 11 ? requestProperty.body.phone : false;
 
@@ -79,7 +79,7 @@ handler._token.post = (requestProperty, callback) => {
 };
 
 // read token data by get request
-handler._token.get = (requestProperty, callback) => {
+handler.tokenHandler._token.get = (requestProperty, callback) => {
     // validate token id
     const tokenId = typeof(requestProperty.queryObject.id) === "string" && requestProperty.queryObject.id.trim().length === 20 ? requestProperty.queryObject.id : false;
 
@@ -103,7 +103,7 @@ handler._token.get = (requestProperty, callback) => {
 };
 
 // update token data by put request
-handler._token.put = (requestProperty, callback) => {
+handler.tokenHandler._token.put = (requestProperty, callback) => {
     // validate token id
     const tokenId = typeof(requestProperty.body.id) === "string" && requestProperty.body.id.trim().length === 20 ? requestProperty.body.id : false;
 
@@ -147,7 +147,7 @@ handler._token.put = (requestProperty, callback) => {
 };
 
 // delete token handler
-handler._token.delete = (requestProperty, callback) => {
+handler.tokenHandler._token.delete = (requestProperty, callback) => {
     // validate token id
     const id = typeof(requestProperty.queryObject.id) === "string" && requestProperty.queryObject.id.trim().length === 20 ? requestProperty.queryObject.id : false;
 
@@ -174,7 +174,7 @@ handler._token.delete = (requestProperty, callback) => {
 
 };
 
-handler._token.verify = (id, phone, callback) => {
+handler.tokenHandler._token.verify = (id, phone, callback) => {
     data.read('tokens', id, (err, tokenData) => {
         if (!err) {
             const tokenObj = parseJSON(tokenData);
